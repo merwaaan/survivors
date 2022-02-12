@@ -96,12 +96,11 @@ impl WandProjectileBundle {
   }
 }
 
-// Coin
-// TODO merge with gem as Loot?
+// Loot
 
 #[derive(Bundle)]
-pub struct CoinBundle {
-  coin: Coin,
+pub struct LootBundle {
+  loot: Loot,
   animation_timer: AnimationTimer,
 
   #[bundle]
@@ -120,55 +119,26 @@ fn create_sprite_sheet<'a>(
   texture_atlases.add(atlas)
 }
 
-impl CoinBundle {
+impl LootBundle {
   pub fn new(
     asset_server: &Res<AssetServer>,
     texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
+    loot_type: LootType,
     x: f32,
     y: f32
   ) -> Self {
-    Self {
-      coin: Coin { },
-      animation_timer: AnimationTimer(Timer::from_seconds(0.1, true)),
-      sprite: SpriteSheetBundle {
-        texture_atlas: create_sprite_sheet("coin.png", asset_server, texture_atlases, 1, 5),
-        transform: Transform::from_xyz(x, y, 0.0),
-        ..Default::default()
-      }
-    }
-  }
-}
-
-// Gem
-
-#[derive(Bundle)]
-pub struct GemBundle {
-  gem: Gem,
-  animation_timer: AnimationTimer,
-
-  #[bundle]
-  sprite: SpriteSheetBundle
-}
-
-impl GemBundle {
-  pub fn new(
-    asset_server: &Res<AssetServer>,
-    texture_atlases: &mut ResMut<Assets<TextureAtlas>>,
-    value: GemValue,
-    x: f32,
-    y: f32
-  ) -> Self {
-    let image = match value {
-      GemValue::Low => "gem_blue.png",
-      GemValue::Medium => "gem_green.png",
-      GemValue::High => "gem_red.png"
+    let sprite_sheet = match loot_type {
+      LootType::Coin => create_sprite_sheet("coin.png", asset_server, texture_atlases, 1, 5),
+      LootType::Gem(GemValue::Low) => create_sprite_sheet("gem_blue.png", asset_server, texture_atlases, 1, 4),
+      LootType::Gem(GemValue::Medium) => create_sprite_sheet("gem_green.png", asset_server, texture_atlases, 1, 4),
+      LootType::Gem(GemValue::High) => create_sprite_sheet("gem_red.png", asset_server, texture_atlases, 1, 4)
     };
 
     Self {
-      gem: Gem { value },
+      loot: Loot(loot_type),
       animation_timer: AnimationTimer(Timer::from_seconds(0.1, true)),
       sprite: SpriteSheetBundle {
-        texture_atlas: create_sprite_sheet(image, asset_server, texture_atlases, 1, 4),
+        texture_atlas: sprite_sheet,
         transform: Transform::from_xyz(x, y, 0.0),
         ..Default::default()
       }

@@ -27,19 +27,20 @@ pub struct Weapons {
   pub timers: HashMap<WeaponType, Timer>
 }
 
-#[derive(Component)]
-pub struct Coin;
-
 pub enum GemValue {
   Low,
   Medium,
   High
 }
 
-#[derive(Component)]
-pub struct Gem {
-  pub value: GemValue
+pub enum LootType
+{
+  Coin,
+  Gem(GemValue)
 }
+
+#[derive(Component)]
+pub struct Loot(pub LootType);
 
 #[derive(Component)]
 pub struct AnimationTimer(pub Timer);

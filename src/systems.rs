@@ -168,33 +168,33 @@ pub fn loot_drop_system(
     match transform {
       Ok(t) => {
 
-        enum LootType {
+        enum DropType {
           Nothing,
           Gem,
           Coin,
         }
 
-        let mut type_wheel: RandomWheel::<LootType> = RandomWheel::new();
-        type_wheel.push(10.0, LootType::Nothing);
-        type_wheel.push(10.0, LootType::Gem);
-        type_wheel.push(5.0, LootType::Coin);
+        let mut type_wheel: RandomWheel::<DropType> = RandomWheel::new();
+        type_wheel.push(10.0, DropType::Nothing);
+        type_wheel.push(10.0, DropType::Gem);
+        type_wheel.push(5.0, DropType::Coin);
         let loot_type = type_wheel.pop().unwrap().1;
 
         match loot_type {
-          LootType::Nothing => {}
+          DropType::Nothing => {}
 
-          LootType::Gem => {
+          DropType::Gem => {
             let mut wheel: RandomWheel::<GemValue> = RandomWheel::new();
             wheel.push(10.0, GemValue::Low);
             wheel.push(1.0, GemValue::Medium);
             wheel.push(0.1, GemValue::High);
             let value = wheel.pop().unwrap().1;
 
-            commands.spawn_bundle(GemBundle::new(&asset_server, &mut texture_atlases, value, t.translation.x, t.translation.y));
+            commands.spawn_bundle(LootBundle::new(&asset_server, &mut texture_atlases, LootType::Gem(value), t.translation.x, t.translation.y));
           }
 
-          LootType::Coin => {
-            commands.spawn_bundle(CoinBundle::new(&asset_server, &mut texture_atlases, t.translation.x, t.translation.y));
+          DropType::Coin => {
+            commands.spawn_bundle(LootBundle::new(&asset_server, &mut texture_atlases, LootType::Coin, t.translation.x, t.translation.y));
           }
         }
       },
