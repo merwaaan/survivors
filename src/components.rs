@@ -10,6 +10,9 @@ pub struct Player {
 pub struct Enemy;
 
 #[derive(Component)]
+pub struct HitBox(pub f32); // The hitbox is a square, the value is half its size
+
+#[derive(Component)]
 pub struct Health(pub i32);
 
 #[derive(Component)]

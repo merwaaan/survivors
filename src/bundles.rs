@@ -1,6 +1,6 @@
 use bevy::{prelude::*, asset::AssetPath};
 use crate::components::*;
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap};
 
 // Player
 
@@ -9,6 +9,7 @@ pub struct PlayerBundle {
   player: Player,
   weapons: Weapons,
   health: Health,
+  hitbox: HitBox,
 
   #[bundle]
   sprite: SpriteBundle
@@ -16,6 +17,8 @@ pub struct PlayerBundle {
 
 impl PlayerBundle {
   pub fn new() -> Self {
+    let size = 50.0;
+
     let mut weapon_timers: HashMap<WeaponType, Timer> = HashMap::new();
     weapon_timers.insert(WeaponType::Wand, Timer::from_seconds(1.0, true));
 
@@ -27,10 +30,11 @@ impl PlayerBundle {
       weapons: Weapons {
         timers: weapon_timers
       },
+      hitbox: HitBox(size * 0.5),
       sprite: SpriteBundle {
         sprite: Sprite {
           color: Color::PINK,
-          custom_size: Some(Vec2::new(50.0, 50.0)),
+          custom_size: Some(Vec2::new(size, size)),
           ..Default::default()
         },
         ..Default::default()
@@ -45,6 +49,7 @@ impl PlayerBundle {
 pub struct EnemyBundle {
   enemy: Enemy,
   health: Health,
+  hitbox: HitBox,
 
   #[bundle]
   sprite: SpriteBundle
@@ -52,13 +57,16 @@ pub struct EnemyBundle {
 
 impl EnemyBundle {
   pub fn new(x: f32, y: f32) -> Self {
+    let size = 50.0;
+
     Self {
       enemy: Enemy {},
       health: Health(10),
+      hitbox: HitBox(size * 0.5),
       sprite: SpriteBundle {
         sprite: Sprite {
           color: Color::RED,
-          custom_size: Some(Vec2::new(50.0, 50.0)),
+          custom_size: Some(Vec2::new(size, size)),
           ..Default::default()
         },
         transform: Transform::from_xyz(x, y, 0.0),
@@ -72,8 +80,8 @@ impl EnemyBundle {
 
 #[derive(Bundle)]
 pub struct WandProjectileBundle {
-
   projectile: Projectile,
+  hitbox: HitBox,
 
   #[bundle]
   sprite: SpriteBundle
@@ -81,12 +89,15 @@ pub struct WandProjectileBundle {
 
 impl WandProjectileBundle {
   pub fn new(x: f32, y: f32, direction: Vec2) -> Self {
+    let size = 10.0;
+
     Self {
       projectile: Projectile { velocity: direction },
+      hitbox: HitBox(size * 0.5),
       sprite: SpriteBundle {
         sprite: Sprite {
           color: Color::BLUE,
-          custom_size: Some(Vec2::new(10.0, 10.0)),
+          custom_size: Some(Vec2::new(size, size)),
           ..Default::default()
         },
         transform: Transform::from_xyz(x, y, 1.0),
@@ -101,6 +112,7 @@ impl WandProjectileBundle {
 #[derive(Bundle)]
 pub struct LootBundle {
   loot: Loot,
+  hitbox: HitBox,
   animation_timer: AnimationTimer,
 
   #[bundle]
@@ -136,6 +148,7 @@ impl LootBundle {
 
     Self {
       loot: Loot(loot_type),
+      hitbox: HitBox(5.0),
       animation_timer: AnimationTimer(Timer::from_seconds(0.1, true)),
       sprite: SpriteSheetBundle {
         texture_atlas: sprite_sheet,
