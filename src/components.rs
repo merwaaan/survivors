@@ -47,3 +47,12 @@ pub struct Loot(pub LootType);
 
 #[derive(Component)]
 pub struct AnimationTimer(pub Timer);
+
+#[derive(Component)]
+pub struct HitPoint(pub i32);
+
+#[derive(Component)]
+pub struct AnimatedText {
+  pub target_scale: f32,
+  pub speed: f32
+}

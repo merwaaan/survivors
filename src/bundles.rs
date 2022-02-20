@@ -158,3 +158,48 @@ impl LootBundle {
     }
   }
 }
+
+// Hit point
+
+#[derive(Bundle)]
+pub struct HitPointBundle {
+  hit_point: HitPoint,
+  animated_text: AnimatedText,
+
+  #[bundle]
+  text: Text2dBundle
+}
+
+impl HitPointBundle {
+  pub fn new(
+    asset_server: &Res<AssetServer>,
+    x: f32,
+    y: f32,
+    value: i32
+  ) -> Self {
+    let font = asset_server.load("Minimal5x7.ttf");
+
+    Self {
+      hit_point: HitPoint(value),
+      animated_text: AnimatedText {
+        target_scale: 2.0,
+        speed: 0.005,
+      },
+      text: Text2dBundle {
+        text: Text::with_section(
+          value.to_string(),
+          TextStyle {
+            font,
+            font_size: 30.0,
+            color: Color::WHITE,
+        },
+        TextAlignment {
+          horizontal: HorizontalAlign::Center,
+          vertical: VerticalAlign::Center
+        }),
+        transform: Transform::from_xyz(x, y, 1.0),
+        ..Default::default()
+      }
+    }
+  }
+}

@@ -1,3 +1,4 @@
+use bevy::ecs::system::Command;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::DrawMode;
 use bevy_prototype_lyon::prelude::GeometryBuilder;
@@ -65,28 +66,47 @@ pub fn enemy_movement_system(
   }
 }
 
-pub fn enemy_damage_system(
+pub fn damage_system(
   mut commands: Commands,
+  asset_server: Res<AssetServer>,
   mut read_hit_events: EventReader<HitEvent>,
   mut send_kill_event: EventWriter<KillEvent>,
-  mut enemies_query: Query<&mut Health, (With<Enemy>, Without<Player>)>,
+  mut enemies_query: Query<(&mut Health, &Transform), (With<Enemy>, Without<Player>)>,
   mut players_query: Query<&mut Health, (With<Player>, Without<Enemy>)>
 ) {
   for event in read_hit_events.iter() {
 
     // Target is an enemy
 
-    let enemy_health = enemies_query.get_component_mut::<Health>(event.target);
+    // Spawn hit points
 
+    let enemy_transform = enemies_query.get_component::<Transform>(event.target);
+    if enemy_transform.is_ok() {
+      let position = &enemy_transform.unwrap().translation;
+      commands.spawn_bundle(HitPointBundle::new(&asset_server, position.x, position.y, event.damage));
+    }
+    else {
+      println!("damage_system: cannot find transform");
+    }
+
+    let enemy_health = enemies_query.get_component_mut::<Health>(event.target);
     if enemy_health.is_ok() {
+
+      // Update health
+
       let health = &mut enemy_health.unwrap().0;
 
       *health -= event.damage;
+
+      // Dead?
 
       if *health <= 0 {
         commands.entity(event.target).despawn_recursive();
         send_kill_event.send(KillEvent { target: event.target });
       }
+    }
+    else {
+      println!("damage_system: cannot find health");
     }
 
     // Target is a player
@@ -269,13 +289,12 @@ pub fn loot_drop_system(
           }
         }
       },
-      _ => panic!("cannot get enemy transform")
+      _ => println!("loot_drop_system: cannot find enemy transform")
     }
   }
 }
 
-
-pub fn animation_system(
+pub fn sprite_animation_system(
   time: Res<Time>,
   texture_atlases: Res<Assets<TextureAtlas>>,
   mut animated_query: Query<(
@@ -289,6 +308,19 @@ pub fn animation_system(
     if timer.0.just_finished() {
       let atlas = texture_atlases.get(atlas_handle).unwrap();
       sprite.index = (sprite.index + 1) % atlas.textures.len();
+    }
+  }
+}
+
+pub fn text_animation_system(
+  mut commands: Commands,
+  mut texts_query: Query<(Entity, &mut Transform, &AnimatedText)>
+) {
+  for (entity, mut transform, animated) in texts_query.iter_mut() {
+    transform.scale += animated.speed;
+
+    if transform.scale.length() >= animated.target_scale {
+      commands.entity(entity).despawn();
     }
   }
 }
